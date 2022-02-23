@@ -7,7 +7,20 @@
 \usepackage[version = 4]{mhchem}
 \usepackage{hyperref}
 \usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{matrix}
 
+\tikzset{ 
+table/.style={
+  matrix of nodes,
+  row sep=-\pgflinewidth,
+  column sep=-\pgflinewidth,
+  nodes={rectangle,draw=black, text width=3em,align=center,anchor=center},
+  text depth=1.25ex,
+  text height=2.5ex,
+  nodes in empty cells
+},
+}
 
 \setlength{\parindent}{0pt}
 
@@ -265,11 +278,41 @@ it decays into $^{205}$Tl via:
 Another reason for using $^{205}$Pb is for studying the early solar system. Analysis of Thallium within carbonaceous chondrites
 has lead to believe that $^{205}$Pb existed in the early solar system \cite{baker2010thallium}.
 
-\section*{Multi-zone framework development}
+\section*{Developed Tools}
 
 Understanding stellar structure requires visual aids to strengthen one's intuition and verify their assumptions. Kippenhahn diagrams 
 are one such example. Kippenhahn diagrams are used to show convective regions in a stellar environment over a given length of time, see
 fig. \ref{conv}
+
+\begin{tikzpicture}
+    % the matrix entries
+    \matrix (mat) [table]
+    {
+    & $\tau_{1} = 8 $ & $\tau_{2} = 4$ & $\tau_{2} = 2$\\
+    $\sigma_{1}$ & $\frac{\ln{2}}{8}$ & $\frac{\ln{2}}{4}$ &$\frac{\ln{2}}{2}$ \\
+    $\sigma_{2}$ & $\frac{2\ln{2}}{8}$ & $\frac{2\ln{2}}{4}$ &$\frac{2\ln{2}}{2}$ \\
+    $\sigma_{3}$ & $\frac{3\ln{2}}{8}$ & $\frac{3\ln{2}}{4}$ &$\frac{3\ln{2}}{2}$ \\
+    $\sigma_{4}$ & $\frac{4\ln{2}}{8}$ & $\frac{4\ln{2}}{4}$ &$\frac{4\ln{2}}{2}$ \\
+    $\sigma_{5}$ & $\frac{5\ln{2}}{8}$ & $\frac{5\ln{2}}{4}$ &$\frac{5\ln{2}}{2}$ \\
+    $\sigma_{6}$ & $\frac{6\ln{2}}{8}$ & $\frac{6\ln{2}}{4}$ &$\frac{6\ln{2}}{2}$ \\
+    $\sigma_{7}$ & $\frac{7\ln{2}}{8}$ & $\frac{7\ln{2}}{4}$ &$\frac{7\ln{2}}{2}$ \\
+    $\sigma_{8}$ & $\frac{8\ln{2}}{8}$ & $\frac{8\ln{2}}{4}$ &$\frac{8\ln{2}}{2}$ \\
+    };
+    
+    % the arrows
+    \begin{scope}[shorten >=7pt,shorten <= 7pt]
+    \draw[->]  (mat-3-2.center) -- (mat-2-3.center);
+    \draw[->]  (mat-5-2.center) -- (mat-3-3.center);
+    \draw[->]  (mat-7-2.center) -- (mat-4-3.center);
+    \draw[->]  (mat-9-2.center) -- (mat-5-3.center);
+    
+    \draw[->]  (mat-3-3.center) -- (mat-2-4.center);
+    \draw[->]  (mat-5-3.center) -- (mat-3-4.center);
+    \draw[->]  (mat-7-3.center) -- (mat-4-4.center);
+    \draw[->]  (mat-9-3.center) -- (mat-5-4.center);
+    
+    \end{scope}
+\end{tikzpicture}
 
 \begin{figure}[H]
     \centerline{\includegraphics[scale = 0.5]{images/conv.png}}
