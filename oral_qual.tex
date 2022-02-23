@@ -7,20 +7,10 @@
 \usepackage[version = 4]{mhchem}
 \usepackage{hyperref}
 \usepackage{float}
+\usepackage{array}
 \usepackage{tikz}
-\usetikzlibrary{matrix}
 
-\tikzset{ 
-table/.style={
-  matrix of nodes,
-  row sep=-\pgflinewidth,
-  column sep=-\pgflinewidth,
-  nodes={rectangle,draw=black, text width=3em,align=center,anchor=center},
-  text depth=1.25ex,
-  text height=2.5ex,
-  nodes in empty cells
-},
-}
+\usetikzlibrary{matrix}
 
 \setlength{\parindent}{0pt}
 
@@ -152,7 +142,7 @@ procedures, such as Cauchy Residue theorem, is quite challenging numerically. To
 method \cite{jacquot1983gaver}. In short the method transforms the integral into the real plane and suggests an appropriate discretization. 
 Figures \ref{fig 2} and \ref{fig 3} show the method's effectiveness at approximating the inverse, where the analytical forms are known. 
 The Jupyter notebook used to generate the graphs is found \href{https://github.com/jaadt7/gaver_stehfest}{here}. The notebook itself goes through 
-exponential, Poisson, and Gaussian distributions; showing the method's effectiveness on each.
+exponential, Poisson, and Gaussian distributions; showing the method's effectiveness on each.\\
 
 \begin{figure}[!htp]
     \centerline{\includegraphics[scale = 0.5]{images/exp_test_1.png}}
@@ -279,10 +269,33 @@ Another reason for using $^{205}$Pb is for studying the early solar system. Anal
 has lead to believe that $^{205}$Pb existed in the early solar system \cite{baker2010thallium}.
 
 \section*{Developed Tools}
+In this section I will discuss the tools I've developed for setting up dummy species and a modified Kippenhahn diagrams for analysis.
 
-Understanding stellar structure requires visual aids to strengthen one's intuition and verify their assumptions. Kippenhahn diagrams 
-are one such example. Kippenhahn diagrams are used to show convective regions in a stellar environment over a given length of time, see
-fig. \ref{conv}
+\subsection*{Setting up the dummy species}
+
+As mentioned earlier, we load the multizone code with dummy species to perform the GS method and attain a $\rho(\tau)$. The issue arises from 
+selecting an appropriate distribution of cross-sections to attribute to the species. From \cite{jacquot1983gaver}, we get the form of the inverse 
+Laplace transform as: 
+
+\begin{equation*}
+\rho(\tau) = \frac{\ln{2}}{\tau} \sum^{2m}_{k=1} w_{k} \tilde{\rho}\left(\frac{k\ln{2}}{\tau}\right)
+\end{equation*}
+
+Assigning unique cross-sections for each value of $\tau$ and `k' is complicated and computationally expensive. To circumvent the problem, we select 
+an array of exposures where each exposure differs from the next by a factor of 2 and equating them to the $k\ln{2}/\tau$ term. A pattern arises
+where the same cross-section will get repeated multiple times, as illustrated in the table. 
+
+\tikzset{ 
+table/.style={
+  matrix of nodes,
+  row sep=-\pgflinewidth,
+  column sep=-\pgflinewidth,
+  nodes={rectangle,draw=black, text width=3em,align=center,anchor=center},
+  text depth=1.25ex,
+  text height=2.5ex,
+  nodes in empty cells
+},
+}
 
 \begin{tikzpicture}
     % the matrix entries
@@ -314,10 +327,42 @@ fig. \ref{conv}
     \end{scope}
 \end{tikzpicture}
 
+If we were to account for all the cross-sections, we would end up with
+
+\begin{align*}
+    n = 2m*n_{\tau}
+\end{align*}
+
+Where n is the total amount of species, $n_{\tau}$ is the number of exposures sampled and m is half the number of terms that goes into the GS 
+summation. In the tabulated example, that would add up to 24 species. The pattern that arises is that from the second column onwards, their top 
+half is repeated in the previous column. Therefore only the first column and the bottom half of each subsequent column are unique. This simplifies 
+n to:
+
+\begin{align*}
+    n = m*\left( n_{\tau} + 1\right)
+\end{align*}
+
+Which counting by hand, or replacing the values in the formula confirm a total of 16 unique cross-sections. Comparing 24 species to 16 may not 
+seem much, but when extending the range of exposures from 3 to 100, the difference between 1400 and 707 species; m is chosen to be 7 since the GS 
+method is most accurate.
+
+\subsection*{Kippenhahn-esque Analysis}
+
+
+Understanding stellar structure requires visual aids to strengthen one's intuition and verify their assumptions. Kippenhahn diagrams 
+are one such example. Kippenhahn diagrams are used to show convective regions in a stellar environment over a given length of time, see
+figs. \ref{conv} and \ref{conv_2}
+
 \begin{figure}[H]
     \centerline{\includegraphics[scale = 0.5]{images/conv.png}}
     \caption{The convective profile of a 3$M_{\odot}$ star from ZAMS till the TP-AGB phase}
     \label{conv}
+\end{figure}
+
+\begin{figure}[H]
+    \centerline{\includegraphics[scale = 0.5]{images/conv_2.png}}
+    \caption{The convective profile of a 3$M_{\odot}$ star between the 8th and 9th thermal pulse}
+    \label{conv_2}
 \end{figure}
 
 These diagrams are generated by graphing the extent of the convective region in terms of mass coordinate in each time step. Simply 
@@ -339,7 +384,7 @@ models available in a saved file. To remedy this, a 2D interpolator is being dev
 approximations. More converged models could be saved, but it is avoided for memory purposes. The color map utility allows for a 
 smooth global analysis of a given property.
 
-\section*{Piecing it all together}
+\subsection*{The Stellar Environment}
 
 To study outlined aspects, we have to look what goes on in the s-process' ``natural habitat". As illustrated in my masters thesis, rotation 
 has major effects on the various phases of stellar evolution. The rotationally induced mixing modes are of specific interest. The study 
@@ -347,6 +392,52 @@ will be carried out by first marrying libnucnet to the stellar evolution code, t
 This will feed the nuclear network with real-time stellar temperature, density, and mixing profiles so s-process calculations can be 
 carried out under more realistic conditions. The post-processing tools would then be used to analyze the output generated by the union 
 and conclusions would be drawn from there.
+
+\section*{Projects and Deliverables}
+
+Having outlined the science to be explored, I present two simple tables that summarize a time-frame on both 
+projects and deliverables
+
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|P{6cm}|P{6cm}|}
+        \hline
+        \multicolumn{2}{|c|}{Deliverables}\\
+        \hline
+        Webnucleo.org (ApJ Research Note) & Spring 2022\\
+        \hline
+        $^{85}Kr$ Isomers & Summer 2022\\
+        \hline
+        masters result with s-process calculations & Summer 2022\\
+        \hline
+        Density of Exposure & Dec 2022\\
+        \hline
+        2D weak rates on $^{205}Pb$ & TBD\\
+        \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|P{6cm}|P{6cm}|}
+        \hline
+        \multicolumn{2}{|c|}{Projects}\\
+        \hline
+        Isomer Workshop & Tentative May 2022\\
+        \hline
+        Meshing libnucnet with stellar code & Summer 2022\\
+        \hline
+        Density of Exposure Analysis & Nov 2022\\
+        \hline
+        Full Isomer Analysis & Feb 2023\\
+        \hline
+        2D Weak Rates Analysis & April 2023\\
+        \hline
+        Write, Defend, and Graduate & Summer 2023\\
+        \hline
+    \end{tabular}
+\end{table}
 
 \singlespacing
 
